@@ -1,0 +1,32 @@
+FROM golang as builder
+
+RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+
+WORKDIR /go/src/github.com/jhh3/multistage-docker-examples/go-example
+
+COPY Gopkg.toml Gopkg.lock ./
+RUN dep ensure --vendor-only
+# Copy source after installing deps to take advantage of layer caching to sped up builds
+COPY . ./
+
+# Statically compile the binary (disable cgo to avoid the dynamic linking to
+# libraries we won't have in our image). If we absolutely need cgo, there are
+# options.
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o petstore cmd/go-example-server/main.go
+
+# This is a special empty (literally 0 bytes) docker base image
+FROM scratch
+
+# If we want to use SSL, we'll need root certificates.  (We need this for the
+# petstore server and will get an error if we don't have them)
+# Most linux distributions have this by default, but our empty base images does
+# not so let's add them
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+# Add statically compiled binary
+COPY --from=builder /go/src/github.com/jhh3/multistage-docker-examples/go-example/petstore .
+
+# NOTE: Arguments must be passed as an array. If we were to use  a string,
+# Docker would have invoked sh as a tokenizer and our scratch base image
+# doesn't have sh!
+CMD ["./petstore", "--scheme=http", "--host=0.0.0.0", "--port=5000"]

@@ -1,0 +1,11 @@
+FROM golang:alpine
+
+RUN apk add --no-cache curl git
+RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+
+COPY . /go/src/github.com/jhh3/multistage-docker-examples/go-example
+WORKDIR /go/src/github.com/jhh3/multistage-docker-examples/go-example
+
+RUN dep ensure
+
+CMD ["go", "run", "cmd/go-example-server/main.go", "--scheme=http", "--host=0.0.0.0", "--port=5000"]
