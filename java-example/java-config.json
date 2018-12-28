@@ -1,0 +1,10 @@
+{
+  "modelPackage" : "com.jhh3.example.model",
+  "apiPackage"   : "com.jhh3.example.api",
+  "invokerPackage" : "com.example",
+  "groupId" : "com.jhh3",
+  "artifactId":"PetstoreSpringBootExample",
+  "artifactVersion":"1.0.0",
+  "fullJavaUtil" : true,
+  "dateLibrary" : "java8"
+}

@@ -1,0 +1,19 @@
+FROM maven:3.6.0-jdk-11 as builder
+
+WORKDIR /home/source/java
+COPY . .
+
+RUN mvn -B clean package \
+	-DskipTests \
+	-Dmaven.gitcommitid.skip \
+	-Dmaven.exec.skip=true \
+	-Dmaven.install.skip
+
+# An openjdk Java 11 alpine build hasn't been mainlined yet
+FROM openjdk:11.0.1-jre-slim
+
+WORKDIR /home/application/java
+
+COPY --from=builder "/home/source/java/target/PetstoreSpringBootExample-1.0.0.jar" .
+
+CMD ["java", "-jar", "PetstoreSpringBootExample-1.0.0.jar"]

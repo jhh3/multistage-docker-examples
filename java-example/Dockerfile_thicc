@@ -1,0 +1,14 @@
+FROM maven:3.6.0-jdk-11
+
+WORKDIR /usr/src/app
+COPY . .
+
+RUN mvn -B clean install \
+	-DskipTests \
+	-Dmaven.gitcommitid.skip \
+	-Dspring-boot.repackage.skip \
+	-Dmaven.exec.skip=true \
+	-Dmaven.install.skip \
+	-Dmaven.resources.skip
+
+ENTRYPOINT mvn spring-boot:run
